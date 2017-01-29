@@ -1,5 +1,105 @@
- API 문서를 읽는 경우에 가장 중요하게 봐야할 4가지를 쓰시오.
- rwxr--r-- 의 의미를 숫자로 표시하시오. ( *** )
- *rwxrw-rw- 에서 *의 자리에 표시되는 d/l/-의 의미를 각각 쓰시오. (3개)
- rw-r--r-- 에서 others에 실행 권한(x)을 주고 싶다. chmod 명령어를 이용해 권한을 주는 3가지 방법을 쓰시오. 예) chmod뒤에 숫자 또는 +/- 또는 =을 사용.
- set-user-bit는 해당 프로그램을 실행시 누구의 권한으로 실행이 되는가?
+1. API 문서를 읽는 경우에 가장 중요하게 봐야할 4가지를 쓰시오.
+2. rwxr--r-- 의 의미를 숫자로 표시하시오. ( *** )
+3. *rwxrw-rw- 에서 *의 자리에 표시되는 d/l/-의 의미를 각각 쓰시오. (3개)
+4. rw-r--r-- 에서 others에 실행 권한(x)을 주고 싶다. chmod 명령어를 이용해 권한을 주는 3가지 방법을 쓰시오. 예) chmod뒤에 숫자 또는 +/- 또는 =을 사용.
+5. 다음은 chmod 함수에 대한 설명이다.
+#include <sys/stat.h>
+int chmod(const char *pathname, mode_t mode);
+
+The chmod() system call change a files mode bits.  (The
+file mode consists of the file permission bits plus the set-user-ID,
+set-group-ID, and sticky bits.)
+
+* chmod() changes the mode of the file specified whose pathname is
+given in pathname, which is dereferenced if it is a symbolic link.
+
+The new file mode is specified in mode, which is a bit mask created
+by ORing together zero or more of the following:
+
+S_IRUSR  (00400)  read by owner
+S_IWUSR  (00200)  write by owner
+S_IXUSR  (00100)  execute/search by owner ("search" applies for
+                 directories, and means that entries within the
+                 directory can be accessed)
+
+S_IRGRP  (00040)  read by group
+S_IWGRP  (00020)  write by group
+S_IXGRP  (00010)  execute/search by group
+
+S_IROTH  (00004)  read by others
+S_IWOTH  (00002)  write by others
+S_IXOTH  (00001)  execute/search by others
+
+아래와 같은 다음 C 코드 실행 후, a라는 파일의 권한을 숫자로 표시하시오 ( *** )
+chmod(“a”, S_IRUSR | S_IXGRP| S_IRGRP | S_IWOTH);
+6. 특정 유저에게 umask를 통해서 기본 권한을 설정하였다. 다음의 경우 umask가 어떻게 설정되어있는지 쓰시오.
+ - 새 파일 생성시 = 644
+ - 새 폴더 생성시 = 755
+예) umask ***
+7. set-user-bit가 설정된 프로그램을 실행시 누구의 권한으로 작동이 되는가? ( 실행하는 사람(나), root, 프로그램 소유자 )
+8. passwd / sudo apt-get install gcc 이 두 명령어를 각각 실행하였을 때의 passwd/apt-get 프로그램이 받는 real user, effective user을 각각 쓰시오. (apt-get은 앞에 sudo가 있다는 점 유의)
+          real user      /      effective user
+passwd =
+apt-get =
+9. ln -s a b 라는 명령어의 의미와, b를 지우는 경우 a의 상태가 어떻게 되는지 쓰시오. (하드링크 또는 소프트링크, 바로가기라는 단어를 포함하여 설명하시오)
+10. 아래는 ls -al의 결과이다.
+-rwxr-wr-w 10 bob bob 172 Feb  2 00:01 a
+이후 ln a c 명령어를 실행하는 경우에 a의 ls -al 결과에서 변경되는 부분이 어디인지, 어떻게 변경되는지 쓰시오.
+
+11. a.out 이라는 프로그램을 아래와 같이 작성하였다.
+#include <stdio.h>
+int main (int argc, char* argv[]) {
+    int i;
+    printf("%d\n", argc);
+    for (i=0; i<argc; i++) {
+        printf("argv[%d]: %s\n", i, argv[i]);
+    }
+    return 82;
+}
+쉘에서 ./a.out a b 1 2 love 를 입력하였을 경우 그 결과를 그대로 쓰시오.
+12. 위 프로그램 작성 후 터미널에서 echo $?를 입력하였을 경우 그 결과를 쓰시오.
+13. exit(); 과 _Exit(); 함수의 차이점에 대해서 설명하시오.
+14. b.out이라는 프로그램을 아래와 같이 작성하였다.
+void m1(void) { printf("1\n"); }
+void m2(void) { printf("2\n"); }
+
+int main(void) {
+    atexit(m2);
+    atexit(m2);
+    atexit(m1);
+    printf("done\n");
+
+    return 0;
+}
+위 프로그램의 실행 결과를 그대로 쓰시오.
+15. program은 아래과 같은 의존성을 가지고 있다.
+          |------> main.c ------> main.o-----------------------|
+          |                                                    |
+lib.h ----|------> bill.c ------> bill.o ---|                  | ---> program
+          |                                 | ---> libfoo.a ---|
+          |------> fred.c ------> fred.o ---|
+
+a) fred.c 변경시 재 생성되어야 하는 파일들은? ( 1~3개 )
+b) 아래 메이크 파일의 공란에 필요한 파일 이름들을 적으시오.
+program : (_________________)
+    gcc –o program main.o libfoo.a
+libfoo.a: (________________)
+    ar crv libfoo.a (_______________) 
+main.o : lib.h main.c
+    gcc –c main.c
+bill.o : (______________)
+    gcc –c bill.c
+fred.o : (_____________)
+gcc –c fred.c
+
+16. malloc과 alloca 함수의 차이점 2가지를 설명하시오.
+17. 아래와 같이 file1, file2, file3이 있다.
+~/test$ cat file1
+file1
+~/test$ cat file2
+file2
+~/test$ cat file3
+asdf
+lkj
+이 때 아래 명령어의 출력 결과를 그대로 쓰시오.
+cat file3 | cat file1 /dev/fd/0 file2 > /dev/fd/1
