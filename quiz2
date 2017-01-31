@@ -238,4 +238,59 @@ int main(void){
 
 위 코드의 결과와 그 이유를 쓰시오.
 
-26. 이번 멘토링에 대한 소감! (못 가르친다, 이해 안간다, 진도가 빠르다, 다음에도 다른 과목을 듣고싶다 등등...)
+26. 아래와 같은 코드가 있다.
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <pthread.h>
+int counter = 0;
+#define NUM_THREAD 2
+pthread_mutex_t lock1;
+pthread_mutex_t lock2;
+
+void* thr_main1(void* arg) {
+    puts("thread 1 start\n");
+    pthread_mutex_lock(&lock1);
+    sleep(1);
+    pthread_mutex_lock(&lock2);
+    counter++;
+    sleep(1);
+    pthread_mutex_unlock(&lock2);
+    pthread_mutex_unlock(&lock1);
+
+    return ((void*)1);
+}
+
+void* thr_main2(void* arg) {
+    puts("thread 2 start\n");
+    pthread_mutex_lock(&lock2);
+    sleep(1);
+    pthread_mutex_lock(&lock1);
+    counter++;
+    sleep(1);
+    pthread_mutex_unlock(&lock1);
+    pthread_mutex_unlock(&lock2);
+
+    return ((void*)1);
+}
+
+int main (void) {
+    int err, i;
+    pthread_t tid[NUM_THREAD];
+    void *tret;
+
+    err = pthread_create(&tid[0], NULL, thr_main1, NULL);
+    if (err != 0) exit(1);
+    err = pthread_create(&tid[1], NULL, thr_main2, NULL);
+    if (err != 0) exit(1);
+
+    for (i=0; i<NUM_THREAD; i++) {
+        if (pthread_join(tid[i], &tret)) exit(2);
+    }
+    printf("done %d!\n", counter);
+    return 0;
+}
+
+이 코드의 결과를 예측하고 왜 그런지 쓰시오. 
+
+27. 이번 멘토링에 대한 소감! (못 가르친다, 이해 안간다, 진도가 빠르다, 다음에도 다른 과목을 듣고싶다 등등...)
